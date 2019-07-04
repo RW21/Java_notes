@@ -1,6 +1,6 @@
 # はじめに
 
-本記事ではJavaにおける並列処理を主に個人の備忘録、勉強用として雑に記しています。
+本記事ではJavaにおける並列処理を主に個人の備忘録、勉強用として雑に記しています。気が向いたら更新します。
 
 # 並列処理
 
@@ -208,4 +208,46 @@ public class StartThread {
 
 # `synchronized`キーワード
 
-Javaの同期ブロックはすべて`synchronized`で
+Javaの同期ブロックはすべて`synchronized`のメソッド修飾子で実装できます。
+
+```java
+  public synchronized void add(int value){
+      this.count += value;
+  }
+  ```
+
+メソッド全体を同期ブロックにするのが好ましくない場合は、一部だけ同期ブロックにすることができます。
+
+```java
+  public void add(int value){
+
+    synchronized(this){
+       this.count += value;   
+    }
+  }
+```
+
+同期ブロックの中のコードは複数のスレッドで同時に実行されることはありません。
+
+# `volatile`キーワード
+
+Volatileとは揮発性という意味です。プログラミングにおいては値が変更されていないようにみえてもアクセスする度に変わっているという意味になります。Javaの`volatile`キーワードは変数がCPUキャッシュにではなくメインメモリに保存されていることを保証をします。
+
+例えば以下のような共有されている変数があるとします。
+
+```java
+public class SharedObject {
+
+    public int counter = 0;
+
+}
+```
+
+スレッド1は`counter`をインクリメントします。スレッド1とスレッド2は度々`counter`を読みます。もし`counter`が`volatile`だと宣言されていない場合は、メインメモリからではなく、CPUキャッシュから値が読まれる恐れがあります。以下の図がこのシチューションを表しています。
+
+![](images/java-volatile-2.png)
+
+出典: [Jenkov.com](http://tutorials.jenkov.com/java-concurrency/volatile.html)
+
+
+## `volatile`だけでは足りない場合
