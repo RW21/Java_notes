@@ -250,4 +250,64 @@ public class SharedObject {
 出典: [Jenkov.com](http://tutorials.jenkov.com/java-concurrency/volatile.html)
 
 
-## `volatile`だけでは足りない場合
+## `volatile`だけでは十分じゃない場合
+
+スレッドが`volatile`な変数を読み込んで、それを元に新しい値に更新してしまうと、その変数は固定されるのを保証されません。変数を読み込んで書き込むまでの間に他のスレッドが書き込む可能性があり、競合状態が発生します。
+
+# `ThreadLocal`
+
+`ThreadLocal`クラスは一つのスレッドにしか読み書きできない変数を作るのに使います。もし2つのスレッドが同じ`ThreadLocal`の参照を読み込むと2つのスレッドは互いの`ThreadLocal`変数をアクセスできません。
+
+## `ThreadLocal`変数の作成
+
+```java
+private ThreadLocal myThreadLocal = new ThreadLocal();
+```
+
+## `ThreadLocal`変数へのアクセス
+
+`ThreadLocal`変数が作成されると以下のように値を設定できます。
+
+```java
+myThreadLocal.set("A thread local value");
+```
+
+値を読み込むには:
+
+```java
+String threadLocalValue = (String) myThreadLocal.get();
+```
+
+# スレッドシグナリング
+
+スレッドシグナリングでスレッド間にシグナルを送ることができます。シグナリングを使えばスレッドが他のスレッドを待機するということができるようになります。
+
+## 共有オブジェクトでシグナリング
+
+共有変数の値を変更することでスレッド間のシグナリングを行うのが最も簡単です。
+
+```java
+public class MySignal{
+
+  protected boolean hasDataToProcess = false;
+
+  public synchronized boolean hasDataToProcess(){
+    return this.hasDataToProcess;
+  }
+
+  public synchronized void setHasDataToProcess(boolean hasData){
+    this.hasDataToProcess = hasData;  
+  }
+
+}
+```
+
+出典: [Jenkov.com](http://tutorials.jenkov.com/java-concurrency/thread-signaling.html)
+
+## `wait()` `notify()` `notifyAll()`
+
+`java.lang.Object`にはシグナルを待機しているスレッドを非アクティブ化するメカニズムがあります。`wait()`をオブジェクトに呼び出すスレッドは他のスレッドがそのオブジェクトが`notify()`を実行するまで非アクティブになります。
+
+<!-- # スレッドデッドロック
+
+スレッド1がAをロックし、Bを待つ。スレッド2がBをロックし、Aを待つ。こういう状況になると、AとBの -->
